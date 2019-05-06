@@ -2,11 +2,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
 	"net/http"
 
-	"github.com/frahman5/danso-backend/main-server/services/publicapi"
+	"cloud.google.com/go/translate"
+	"github.com/frahman5/googletranslateclonebackend/services/publicapi"
 )
 
 // Services
@@ -15,6 +17,8 @@ var api publicapi.API
 func main() {
 	var (
 		dev, staging, production bool
+		ctx                      context.Context
+		client                   *translate.Client
 		err                      error
 	)
 
@@ -29,6 +33,15 @@ func main() {
 	if production || staging {
 		dev = false
 	}
+
+	// Create google translate client
+	ctx = context.Background()
+	if client, err = translate.NewClient(ctx); err != nil {
+		log.Fatalf("Failed to create client: %v", err)
+	}
+
+	// Create the API object
+	api = publicapi.API{TranslationClient: client, Context: ctx}
 
 	// Set up ServeMux
 	http.HandleFunc("/translate", api.HandleTranslate)
