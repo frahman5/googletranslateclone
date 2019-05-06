@@ -62,7 +62,9 @@ func (a *API) HandleTranslate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	fmt.Printf("Just sent response with translation text: %v\n", translations[0].Text)
 	fmt.Fprint(w, translations[0].Text)
+	fmt.Fprint(w, "hi")
 }
 
 // HealthCheckHandler is the handler for /_ah/health. It signals that the server is responding to requests.
