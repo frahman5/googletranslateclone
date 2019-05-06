@@ -9,7 +9,6 @@ import (
 
 	"cloud.google.com/go/translate"
 	"github.com/frahman5/googletranslateclonebackend/services/publicapi"
-	"google.golang.org/appengine"
 )
 
 // Services
@@ -47,13 +46,13 @@ func main() {
 	// Set up ServeMux
 	http.HandleFunc("/translate", api.HandleTranslate)
 	http.HandleFunc("/", api.HealthCheckHandler)
-	appengine.Main()
-	// if dev {
-	// 	log.Print("Listening on port 8080")
-	// 	log.Fatal(http.ListenAndServe(":8080", nil))
-	// }
-	// if staging {
-	// 	log.Print("Listening on port 443, http")
-	// 	log.Fatal(http.ListenAndServe(":443", nil))
-	// }
+	// appengine.Main()
+	if dev {
+		log.Print("Listening on port 8080")
+		log.Fatal(http.ListenAndServe(":8080", nil))
+	}
+	if staging {
+		log.Print("Listening on port 443, http")
+		log.Fatal(http.ListenAndServe(":443", nil))
+	}
 }

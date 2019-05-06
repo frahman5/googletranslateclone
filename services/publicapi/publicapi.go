@@ -35,10 +35,11 @@ type API struct {
 // detecting the input language if needed, and returns the appropriate result
 func (a *API) HandleTranslate(w http.ResponseWriter, r *http.Request) {
 	var (
-		target       language.Tag
-		payload      TranslatePayload
-		translations []translate.Translation
-		err          error
+		inputTag, targetTag language.Tag
+		opts                translate.Options
+		payload             TranslatePayload
+		translations        []translate.Translation
+		err                 error
 	)
 
 	// Unmarshal the JSON payload
@@ -48,19 +49,50 @@ func (a *API) HandleTranslate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Sets the target language.
-	if target, err = language.Parse("ru"); err != nil {
-		http.Error(w, err.Error(), 400)
-		log.Printf("Failed to parse target language: %v", err)
-		return
+	tags := []language.Tag{
+		language.English,
+		language.Albanian,
+		language.Spanish,
+		language.Azerbaijani,
+		language.Russian,
+		language.BritishEnglish,
+		language.French,
+		language.Afrikaans,
+		language.BrazilianPortuguese,
+		language.EuropeanPortuguese,
+		language.Croatian,
+		language.SimplifiedChinese,
+		language.Raw.Make("iw-IL"),
+		language.Raw.Make("iw"),
+		language.Raw.Make("he"),
 	}
+	m := language.NewMatcher(tags)
 
-	// Translates the text into Russian.
-	if translations, err = a.TranslationClient.Translate(a.Context, []string{payload.InputText}, target, nil); err != nil {
+	// Get the input language
+	inputTag, _ = language.MatchStrings(m, payload.InputLanguage)
+	fmt.Println(inputTag)
+
+	// Get the target language.
+	targetTag, _ = language.MatchStrings(m, payload.OutputLanguage)
+	fmt.Println(targetTag)
+
+	// Translates the text.
+	opts = translate.Options{Source: inputTag, Format: translate.Text, Model: "base"}
+	if !payload.ShouldDetectLanguage {
+		// If we're not detecting the language, pass in an opts with the best guess for input language
+		translations, err = a.TranslationClient.Translate(a.Context, []string{payload.InputText}, targetTag, &opts)
+	}
+	// If we're detecting the language, then pass in a nil options and google will detect for us
+	translations, err = a.TranslationClient.Translate(a.Context, []string{payload.InputText}, targetTag, nil)
+	if err != nil {
 		http.Error(w, err.Error(), 400)
 		log.Printf("Failed to translate text: %v", err)
 		return
 	}
+
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
 	fmt.Printf("Just sent response with translation text: %v\n", translations[0].Text)
 	fmt.Fprint(w, translations[0].Text)
