@@ -59,7 +59,8 @@ func main() {
 	// Set up ServeMux
 	http.HandleFunc("/translate", api.HandleTranslate)
 	http.HandleFunc("/detectlanguage", api.HandleDetectLanguage)
-	http.HandleFunc("/", api.HealthCheckHandler)
+	http.HandleFunc("/_ah/health", api.HealthCheckHandler)
+	http.Handle("/", http.FileServer(http.Dir("/Users/faiyam/Development/Gocode/src/github.com/frahman5/googletranslateclonebackend/frontend/build")))
 	// appengine.Main()
 	if dev {
 		log.Print("Listening on port 8080")
