@@ -8,11 +8,13 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/translate"
+	"github.com/frahman5/googletranslateclonebackend/services/config"
 	"github.com/frahman5/googletranslateclonebackend/services/publicapi"
 	"github.com/frahman5/googletranslateclonebackend/services/utils"
 )
 
 // Services
+var cfg config.Config
 var api publicapi.API
 
 func main() {
@@ -35,6 +37,11 @@ func main() {
 		dev = false
 	}
 
+	// Create COnfig
+	if cfg, err = config.NewConfig(true, false, false); err != nil {
+		log.Fatalf("Failed to create config: %v", err)
+	}
+
 	// Create google translate client
 	ctx = context.Background()
 	if client, err = translate.NewClient(ctx); err != nil {
@@ -42,7 +49,7 @@ func main() {
 	} // We don't do a defer client.Close() because the client should never close! :)
 
 	// Create the API object
-	api = publicapi.API{TranslationClient: client, Context: ctx}
+	api = publicapi.API{Config: cfg, TranslationClient: client, Context: ctx}
 
 	// List supported languages
 	if err = utils.ListSupportedLanguages("en"); err != nil {
@@ -51,6 +58,7 @@ func main() {
 
 	// Set up ServeMux
 	http.HandleFunc("/translate", api.HandleTranslate)
+	http.HandleFunc("/detectlanguage", api.HandleDetectLanguage)
 	http.HandleFunc("/", api.HealthCheckHandler)
 	// appengine.Main()
 	if dev {

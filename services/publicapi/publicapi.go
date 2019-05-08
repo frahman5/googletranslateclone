@@ -19,6 +19,10 @@ type translatePayload struct {
 	ShouldDetectLanguage bool   `json:"shouldDetectLanguage"`
 }
 
+type detectPayload struct {
+	InputText string `json:"inputText"`
+}
+
 // API is a struct that holds all the other structs necessary to handle API requests.
 type API struct {
 	// Config is a type that holds all the configurations for the app
@@ -82,9 +86,46 @@ func (a *API) HandleTranslate(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, translations[0].Text)
 }
 
-// HealthCheckHandler is the handler for /_ah/health. It signals that the server is responding to requests.
+// HealthCheckHandler is the handler for /. It signals that the server is responding to requests.
 func (a *API) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "ok")
+}
+
+// HandleDetectLanguage is the handler for /detectlanguage. It returns a best guess for the the
+// language of the inputText
+func (a *API) HandleDetectLanguage(w http.ResponseWriter, r *http.Request) {
+	var (
+		detections [][]translate.Detection
+		payload    detectPayload
+		guessTag   string
+		err        error
+	)
+
+	// Unmarshal the JSON payload
+	if err = json.NewDecoder(r.Body).Decode(&payload); err != nil {
+		http.Error(w, err.Error(), 400)
+		log.Println(err.Error())
+		return
+	}
+
+	if detections, err = a.TranslationClient.DetectLanguage(a.Context, []string{payload.InputText}); err != nil {
+		http.Error(w, err.Error(), 400)
+		log.Println(err.Error())
+		return
+	}
+
+	// detections[0] because this endpoint expects to only receive ONE piece of text. So the first slice of dections
+	// is what we want.
+	for _, detectionSlice := range detections {
+		var maxConfidence = -1.0
+		for _, detection := range detectionSlice {
+			if detection.Confidence > maxConfidence {
+				guessTag = detection.Language.String()
+			}
+		}
+	}
+
+	fmt.Fprint(w, guessTag)
 }
 
 func (a *API) getSuppoortedLanguagesMatcher() (matcher language.Matcher) {

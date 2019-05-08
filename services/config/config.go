@@ -5,6 +5,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Config holds all the configurations for the entire app.
@@ -96,12 +97,14 @@ func checkEnvFlags(dev, staging, production bool) (err error) {
 // GetAbsoluteFilepath returns the absolute filepath of an asset given its filepath relative
 // to eitherthe applications root directory
 func getAbsoluteFilepath(relativeFilepath string) (absoluteFilepath string, err error) {
-	var gopath string
+	var cwd, maindir string
 
-	if gopath = os.Getenv("GOPATH"); gopath == "" {
-		err = errors.New("empty GOPATH environment variable. Please set your GOPATH")
+	if cwd, err = os.Getwd(); err != nil {
+		return
 	}
-	absoluteFilepath = filepath.Join(gopath, "src/github.com/frahman5/googletranslateclonebackend", relativeFilepath)
+	maindir = strings.SplitAfter(cwd, "googletranslateclonebackend")[0]
+
+	absoluteFilepath = filepath.Join(maindir, relativeFilepath)
 
 	return
 }
