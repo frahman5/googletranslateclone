@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	"github.com/frahman5/googletranslateclonebackend/services/utils"
+	"github.com/frahman5/googletranslateclone/services/utils"
 )
 
 // Config holds all the configurations for the entire app.

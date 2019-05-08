@@ -49,7 +49,7 @@ func GetAbsoluteFilepath(relativeFilepath string) (absoluteFilepath string, err 
 	if cwd, err = os.Getwd(); err != nil {
 		return
 	}
-	maindir = strings.SplitAfter(cwd, "googletranslateclonebackend")[0]
+	maindir = strings.SplitAfter(cwd, "googletranslateclone")[0]
 
 	absoluteFilepath = filepath.Join(maindir, relativeFilepath)
 

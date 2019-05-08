@@ -7,9 +7,9 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/translate"
-	"github.com/frahman5/googletranslateclonebackend/services/config"
-	"github.com/frahman5/googletranslateclonebackend/services/publicapi"
-	"github.com/frahman5/googletranslateclonebackend/services/utils"
+	"github.com/frahman5/googletranslateclone/services/config"
+	"github.com/frahman5/googletranslateclone/services/publicapi"
+	"github.com/frahman5/googletranslateclone/services/utils"
 	"google.golang.org/appengine"
 )
 

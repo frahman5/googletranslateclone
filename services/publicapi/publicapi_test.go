@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"cloud.google.com/go/translate"
-	"github.com/frahman5/googletranslateclonebackend/services/config"
+	"github.com/frahman5/googletranslateclone/services/config"
 	"golang.org/x/text/language"
 )
 
