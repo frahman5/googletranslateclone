@@ -1,23 +1,83 @@
 import React, { Component } from 'react';
-import './app-720minus.css'
-import './app-720plus.css'
-// import './app2.css'
-
-import Flux from './flux.js';
-import Utils from './utils.js';
-import Config from './config.js';
-import Client from './client.js';
+import TextareaAutosize from 'react-textarea-autosize';
+import Flux from './flux.js'
+import Utils from './utils.js'
+import Client from './client.js'
+import Config from './config.js'
+import './assets/css/app-720minus.css'
+import './assets/css/app-720plus.css'
 
 /* Define the view */
 class App extends Component {
+	constructor(props) {
+		super(props)
+
+		// Initalize state
+		let initialState = Flux.store.getState()
+		this.state = {'sourceText' : initialState.sourceText, 'width' : window.innerWidth}
+
+		// Bind this
+		this.handleStateUpdate = this.handleStateUpdate.bind(this)
+		this.updateDimensions = this.updateDimensions.bind(this)
+	}
+
+	updateDimensions() {
+		let oldWidth = this.state.width
+		this.setState({
+			'width': window.innerWidth
+		})
+
+		// If we move between mobile and laptop views, force update to make sure that the input and output boxes are sized appropriately. 
+		if ((this.state.width > 720) && (oldWidth < 720)) {
+			this.forceUpdate()
+		}
+		if ((this.state.width < 720) && (oldWidth > 720)) {
+			this.forceUpdate()
+		}
+
+		// If sourceText is not empty and the window width changes, force update to make sure boxes are resized appropriately. 
+		if ((this.state.sourceText.length !== 0) && (oldWidth != this.state.width)) {
+			var maxHeight;
+			let inputScrollHeight = document.getElementById("@sourceText").scrollHeight
+			let outputTextElem = document.getElementById("@targetText")
+			if (outputTextElem === null) {
+				maxHeight = inputScrollHeight
+			}
+			maxHeight = Math.max(inputScrollHeight, outputTextElem.scrollHeight)
+			Flux.store.dispatch(Flux.createNewSourceScrollHeightAction(maxHeight))
+			console.log("Force updating")
+			this.forceUpdate()
+		}
+	}
+
+	componentWillMounth() {
+		this.updateDimensions()
+	}
+
+	componentDidMount() {
+		Flux.store.subscribe(this.handleStateUpdate)
+
+		// Add a listener for window size changing, so we can re-render the app if they move between mobile and 
+		// 720px+ views
+		window.addEventListener("resize", this.updateDimensions);
+	}
+
+	handleStateUpdate() {
+		let newState = Flux.store.getState()
+		this.setState((state, props) => {
+			return {'sourceText' : newState.sourceText}
+		})
+	}
+
   render() {
-    console.log(Flux.store.getState());
+		let shouldDisplayError = (this.state.sourceText.length >= 5000)
     return (
       <div className="page">
-	  			<Header />
-	  			<TranslationContainer />
-	  			<Background />
-	  		</div>
+            <Header />
+            <TranslationContainer />
+            <Background />
+            <ErrorBar display={shouldDisplayError} ErrorMessage="Character limit: 5000"/>
+        </div>
       );
   }
 }
@@ -34,12 +94,18 @@ class TranslationContainer extends Component {
       'sourceLanguages': initialState.sourceLanguages,
       'targetLanguages': initialState.targetLanguages,
       'selectBoxOpen': initialState.selectBoxOpen,
-      'searchText': initialState.searchText
+      'sourceText' : initialState.sourceText,
+			'searchText': initialState.searchText,
+			'targetText' : initialState.targetText,
+			'sourceScrollHeight' : initialState.sourceScrollHeight
     };
 
     // Bind methods to this
     this.handleStateUpdate = this.handleStateUpdate.bind(this);
-    this.handleNewInput = this.handleNewInput.bind(this);
+		this.handleNewInput = this.handleNewInput.bind(this);
+		this.getContainerHeight = this.getContainerHeight.bind(this);
+		this.getInputBoxHeight = this.getInputBoxHeight.bind(this);
+		this.getOutputBuxHeight = this.getOutputBoxHeight.bind(this);
   }
 
   componentDidMount() {
@@ -47,16 +113,18 @@ class TranslationContainer extends Component {
   }
 
   handleStateUpdate() {
-
     this.setState((state, props) => {
-      let newState = Flux.store.getState();
-      console.log("Current state", newState)
+			let newState = Flux.store.getState();
+			console.log("New scroll height: ", this.state.sourceScrollHeight);
       return {
         'displaySelectLanguageDropdown': newState.selectBoxOpen,
         'sourceLanguages': newState.sourceLanguages,
         'targetLanguages': newState.targetLanguages,
         'selectBoxOpen': newState.selectBoxOpen,
-        'searchText': newState.searchText
+        'sourceText' : newState.sourceText,
+				'searchText': newState.searchText,
+				'sourceScrollHeight' : newState.sourceScrollHeight,
+				'targetText' : newState.targetText
       };
 
     })
@@ -64,11 +132,51 @@ class TranslationContainer extends Component {
   }
 
   handleNewInput(evt) {
+		// Create new source text action
     Flux.store.dispatch(Flux.createNewSourceTextAction(
       evt.target.value,
       Utils.getActiveLanguage(this.state.sourceLanguages),
-      Utils.getActiveLanguage(this.state.targetLanguages)));
+			Utils.getActiveLanguage(this.state.targetLanguages)));
+			
+		// Ask the store to update the scroll height
+		let textareaElem = document.getElementById("@sourceText");
+		let outputElem = document.getElementById("@targetText");
+		let maxHeight = Math.max(outputElem.scrollHeight, textareaElem.scrollHeight);
+		Flux.store.dispatch(Flux.createNewSourceScrollHeightAction(maxHeight));
+
   }
+
+	// Container height must respond to height of text area. Formula is based on original height ratios 
+	// when text area is empty
+	getContainerHeight() {
+		if (window.innerWidth > 720) {
+			 return this.state.sourceScrollHeight + 120
+		}
+		return 182
+	}
+
+	// InputBox height must respond to height of text area. Formula is based on original height ratios 
+	// when text area is empty
+	getInputBoxHeight() {
+		if (window.innerWidth > 720) {
+			return this.state.sourceScrollHeight + 72
+		}
+		return 134
+	}
+
+	// Outputbox height must respond to height of text area. Formula is based on original height ratios 
+	// when text area is empty
+	getOutputBoxHeight() {
+		if (window.innerWidth > 720) {
+			return this.state.sourceScrollHeight + 72
+		}	else {
+			let targetText = document.getElementById("@targetText")
+			if (targetText === null) {
+				return 0
+			}
+			return targetText.scrollHeight + 72
+		}
+	}
 
   render() {
     // If the language selection dropdown menu is open, kill the box shadow on the translation container. 
@@ -77,11 +185,12 @@ class TranslationContainer extends Component {
     let translationContainerConditionalCSS = ((this.state.selectBoxOpen !== "") ? "killBoxShadow" : "")
     let translationHeaderConditionalCSS = ((this.state.selectBoxOpen !== "") ? "addTranslationHeaderBoxShadow" : "")
     let conditionalCSSBasedOnSearchText = ((this.state.searchText !== "") ? "translationHeaderDontDisplayAsFunctionOfSearchText" : "")
+    let shouldShrinkText = ((this.state.sourceText.length > 100) || (this.state.targetText > 100))
     return (
-      <div className={"translationContainer " + translationContainerConditionalCSS}>
+      <div style={{height: this.getContainerHeight() + "px"}} className={"translationContainer " + translationContainerConditionalCSS}>
 				<TranslationHeader conditionalCSS={translationHeaderConditionalCSS + " " + conditionalCSSBasedOnSearchText}/>
-				<TranslationInputBox onInput={this.handleNewInput}/>
-				<TranslationOutputBox />
+				<TranslationInputBox height={this.getInputBoxHeight()} onInput={this.handleNewInput} shouldShrink={shouldShrinkText} inputLength={this.state.sourceText.length}/>
+				<TranslationOutputBox height={this.getOutputBoxHeight()} shouldShrink={shouldShrinkText}/>
 				<TranslationSelectLanguageDropdownContainer display={this.state.displaySelectLanguageDropdown}/>
 			</div>
       );
@@ -185,40 +294,38 @@ class TranslationHeader extends Component {
   render() {
     return (
       <div className={"translationHeader " + this.props.conditionalCSS}>
-				<div className="translationHeader--input">
-					<div className="translationHeader--input--languages">
-                        {this.state.sourceLanguages.map((value) => {
-        let trueLanguage = value.language
-        if (value.language === Config.detectLanguageHeaderBarHTML) {
-          if ((this.state.sourceLanguageDetection !== "") && (this.state.sourceLanguageDetection !== "und")) {
-            trueLanguage = this.state.languageTagMap.get(this.state.sourceLanguageDetection) + "\u00A0-\u00A0Detected"
-          }
-        }
-        return <TranslationHeaderOptionButton
-          selected={value.selected}
-          text={trueLanguage}
-          sourceOrTarget="source"
-          onClick={this.handleLanguageSelectionClick}/>
-      })}
-						<FadeBox />
-					</div>
-					<MenuButton flipped={(this.state.selectBoxOpen !== "")} sourceOrTarget="source"/>
-				</div>
-				<SwitchButton active={this.state.switchButtonActive} onClick={this.handleSwitchClick}/>
-				<div className="translationHeader--output">
-					<div className="translationHeader--output--languages">
-                        {this.state.targetLanguages.map((value) => {
-        return <TranslationHeaderOptionButton
-          selected={value.selected}
-          text={value.language}
-          sourceOrTarget="target"
-          onClick={this.handleLanguageSelectionClick} />
-      })}
-						<FadeBox />
-					</div>
-					<MenuButton flipped={(this.state.selectBoxOpen !== "")} sourceOrTarget="target"/>
-				</div>
-			</div>
+			<div className="translationHeader--input">
+				<div className="translationHeader--input--languages">
+                    {this.state.sourceLanguages.map((value) => {
+                        let trueLanguage = value.language
+                        if (value.language === Config.detectLanguageHeaderBarHTML) {
+                            if ((this.state.sourceLanguageDetection !== "") && (this.state.sourceLanguageDetection !== "und")) {
+                                trueLanguage = this.state.languageTagMap.get(this.state.sourceLanguageDetection) + "\u00A0-\u00A0Detected"
+                            }
+                        }
+                        return <TranslationHeaderOptionButton
+                        selected={value.selected}
+                        text={trueLanguage}
+                        sourceOrTarget="source"
+                        onClick={this.handleLanguageSelectionClick}/>})}
+                    <FadeBox />
+                </div>
+                <MenuButton flipped={(this.state.selectBoxOpen !== "")} sourceOrTarget="source"/>
+            </div>
+            <SwitchButton active={this.state.switchButtonActive} onClick={this.handleSwitchClick}/>
+            <div className="translationHeader--output">
+                <div className="translationHeader--output--languages">
+                    {this.state.targetLanguages.map((value) => {
+                        return <TranslationHeaderOptionButton
+                        selected={value.selected}
+                        text={value.language}
+                        sourceOrTarget="target"
+                        onClick={this.handleLanguageSelectionClick}/>})}
+                    <FadeBox />
+                </div>
+                <MenuButton flipped={(this.state.selectBoxOpen !== "")} sourceOrTarget="target"/>
+            </div>
+        </div>
       );
   }
 }
@@ -302,7 +409,7 @@ class TranslationSelectLanguageDropdownContainer extends Component {
     let conditionalCSSForRecentLanguages = ((this.state.recentLanguages.length === 0) ? "dontDisplay" : "");
     let conditionalCSSForDetectLanguageBox = ((this.props.display === "source") ? "" : "dontDisplay");
     let conditionalCSSForDetectLanguageH5 = getConditionalCSSForLanguageListItem(activeSourceLanguage, activeTargetLanguage, this.props.display, Config.detectLanguageDropdownMenuHTML);
-    let conditionalCSSBasedOnSearchText = ((this.state.searchText !== "") ? "dontDisplay" : ":")
+    let conditionalCSSBasedOnSearchText = ((this.state.searchText !== "") ? "dontDisplay" : "")
 
     return (
       <div className={"TranslationSelectLanguageDropdownContainer " + conditionalCSSForTopMostContainer}>
@@ -435,20 +542,40 @@ class TranslationInputBox extends Component {
         'selectBoxOpen': newState.selectBoxOpen
       };
     })
-  }
+	}
+	
+	// If we;re on mobile, text input box shouldn't auto resize. So use a normal textarea element. 
+	// If we're at > 720px, use a auto resizing text area
+	renderTextareaAsFunctionOfWindowSize() {
+		let reduceFontIfLongInputCSS = (this.props.shouldShrink ? "smallFont" : "")
+		if (window.innerWidth > 720) {
+			return (< TextareaAutosize
+									id="@sourceText"
+									className={reduceFontIfLongInputCSS}
+									onInput={this.props.onInput}
+									value={this.state.sourceText}
+									maxLength="5000"
+									uniqueKey="fancytextarea"/>)
+		}
+		return  <textarea id="@sourceText"
+										  className={reduceFontIfLongInputCSS}
+										  onInput={this.props.onInput}
+										  value={this.state.sourceText}
+										  maxLength="5000"
+											uniqueKey="normaltextarea">"
+						</textarea>
+	}
 
   render() {
-    let conditionalCSSForTranslationInputBox = ((this.state.selectBoxOpen !== "") ? "dontDisplay" : "")
+    let dontDisplayIfSelectBoxOpen = ((this.state.selectBoxOpen !== "") ? "dontDisplay" : "")
+		
+		let redColorIfTooLongInputCSS = ((this.props.inputLength >= 5000) ? "charcountError" : "")
     return (
-      <div className={"translationInputBox " + conditionalCSSForTranslationInputBox}>
+      <div style={{height: this.props.height + "px"}} className={dontDisplayIfSelectBoxOpen + " translationInputBox"}>
 				<form className='translationInputTextArea'> 
-					<textarea
-      onInput={this.props.onInput}
-      value={this.state.sourceText}
-      >
-					</textarea>
+					{this.renderTextareaAsFunctionOfWindowSize()}
 				</form>
-
+				<Widget className={redColorIfTooLongInputCSS + " charCount"} text={this.props.inputLength + "/5000"}/>
 			</div>
       );
   }
@@ -481,10 +608,11 @@ class TranslationOutputBox extends Component {
   }
 
   render() {
-    let conditionalCSS = (this.state.targetText === "" ? "translationOutputBox--empty" : "translationOutputBox--filled");
+    let emptyOrFilledCSS = (this.state.targetText === "" ? "translationOutputBox--empty" : "translationOutputBox--filled");
+    let reduceFontIfLongInputCSS = (this.props.shouldShrink ? "smallFont" : "")
     return (
-      <div className={conditionalCSS}>
-                <h1 className={(this.state.targetText === "" ? "emptyTranslateBox" : "")}>
+      <div style={{height: this.props.height + "px"}} className={emptyOrFilledCSS + " " + reduceFontIfLongInputCSS}>
+                <h1 id="@targetText" className={reduceFontIfLongInputCSS + " " + (this.state.targetText === "" ? "emptyTranslateBox" : "")}>
                     {(this.state.targetText === "" ? "Translation" : this.state.targetText)}
                 </h1>
 			</div>
@@ -589,6 +717,19 @@ const SwitchButton = (props) => {
             </div>
         </div>
     );
+}
+
+const ErrorBar = (props) => {
+		console.log("Value of display prop in ErrorBar: ", props.display)
+    return (
+        <footer className={!props.display? "dontDisplay" : ""}><p>{props.ErrorMessage}</p></footer>
+    )
+}
+
+const Widget = (props) => {
+	return (
+		<div className={props.className}><p>{props.text}</p></div>
+	)
 }
 // getConditionalCSSForLanguageListItem returns the conditional CSS for a languageListItem. 
 // str str str str -> str

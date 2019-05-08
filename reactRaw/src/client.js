@@ -20,13 +20,6 @@ function getTranslation(inputText, inputLang, outputLang, shouldDetectLanguage) 
     "outputLanguage": languageTagMap.get(outputLang),
     "shouldDetectLanguage": shouldDetectLanguage
   }
-
-  console.log("Value of input variables in getTranslation\ninputText-- ", inputText, 
-    " -- inputLang; ", inputLang, " -- outputLang: ", outputLang, " -- shouldDetectLanguage", 
-    shouldDetectLanguage)
-  console.log("Value of languageTagMap.get(inputLang): ", languageTagMap.get(inputLang))
-  console.log("Value of languageTagMap.get(outputLang): ", languageTagMap.get(outputLang))
-  console.log("JSON package to /translate endpoint: ", data)
   // Should add something that checks status
   return fetch(TRANSLATE_ENDPOINT, {
     method: 'post',

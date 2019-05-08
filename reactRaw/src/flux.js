@@ -22,8 +22,17 @@ const NEW_TARGET_TEXT_ACTION_TYPE = "NEW_TARGET_TEXT"
 const CLOSE_SELECT_LANGUAGE_DROPDOWN_ACTION_TYPE = "CLOSE_SELECT_LANGUAGE_DROPDOWN"
 const NEW_SEARCH_TEXT_ACTION_TYPE = "NEW_SEARCH_TEXT"
 const NEW_DETECTION_ACTION_TYPE = "NEW_DETECTION"
+const NEW_SOURCE_SCROLL_HEIGHT_ACTION_TYPE = "NEW_SOURCE_SCROLL_HEIGHT"
 
 /********** ACTION CREATION FUNCTIONS *********/
+
+// height: int (e.g 248). reps px. 
+function createNewSourceScrollHeightAction(height) {
+	return {
+		'type' : NEW_SOURCE_SCROLL_HEIGHT_ACTION_TYPE,
+		'height' : height
+	}
+}
 // createSelectLanguageAction creates an action of type 'SELECT_LANGUAGE'
 //    str str -> action
 //    inputOrOutput must be one of "input" or "output"
@@ -124,7 +133,8 @@ const rootReducer = combineReducers({
   'selectBoxOpen': selectBoxOpenReducer,
   'languages': languagesReducer,
   'searchText': searchTextReducer,
-  'sourceLanguageDetection': sourceLanguageDetectionReducer
+	'sourceLanguageDetection': sourceLanguageDetectionReducer, 
+	'sourceScrollHeight' : sourceScrollHeightReducer
 });
 const store = createStore(rootReducer);
 
@@ -285,9 +295,9 @@ function recentLanguagesReducer(state = [], action) {
   switch (action.type) {
     // If the user selects a new language, update the recent languages array
     case SELECT_LANGUAGE_ACTION_TYPE:
-      if ((action.selection === Config.detectLanguageDropdownMenuHTML) || (action.selection === Config.detectLanguageHeaderBarHTML)) {
+      if ((action.selection === Config.detectLanguageDropdownMenuHTML) || (action.selection === Config.detectLanguageHeaderBarHTML) || (action.selection.toLowerCase().includes("detected"))) {
         // If they selected "Detect Language", make no change
-      } else if (newRecentLanguageArray.indexOf(action.selection) >= 0) {
+			} else if (newRecentLanguageArray.indexOf(action.selection) >= 0) {
 
         // If the language is already in recentLanguages, move it to the top of the stack
         newRecentLanguageArray = newRecentLanguageArray.filter((lang) => {
@@ -387,6 +397,25 @@ function selectBoxOpenReducer(state = "", action) {
   return newState;
 }
 
+function sourceScrollHeightReducer(state=131, action) {
+	var newState // int e.g 48. reps px. 
+
+	switch (action.type) {
+		case NEW_SOURCE_SCROLL_HEIGHT_ACTION_TYPE:
+			newState = action.height;
+			break;
+		case NEW_SOURCE_TEXT_ACTION_TYPE:
+			newState = state
+			if (action.text.length < 10) {
+				newState = 131
+			}
+			break;
+		default:
+			newState = state
+	}
+
+	return newState
+}
 
 /********* HELPER FUNCTIONS *********/
 // doesLanguageSelectionArrayContainLanguage checks if the given languageSelectionArray contains
@@ -514,7 +543,8 @@ const Flux = {
   createNewTargetTextAction,
   createCloseSelectLanguageDropdownAction,
   createNewSearchTextAction,
-  createNewDetectionAction
+	createNewDetectionAction,
+	createNewSourceScrollHeightAction
 }
 
 export default Flux;

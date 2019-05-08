@@ -87,6 +87,10 @@ Main Translation Box
     padding: 17px 20px;
 }
 
+.translationInputTextArea {
+    height: 95%;
+}
+
 .translationOutputBox--empty, .translationOutputBox--filled  {
     height: 167px; width: 100%;
     background-color: blue;
@@ -97,6 +101,7 @@ Main Translation Box
     font-weight: normal;
     line-height: normal;
     margin: 0 0;
+    overflow-wrap: break-word;
 }
 textarea {
     resize: none;
@@ -164,7 +169,7 @@ textarea:focus {
 
 /* Invisible div that enables gradient slide-under effect on Translation Header */
 .fadeBox {
-    width: 24px; height: 98%; /* 98% so it doesn't affect the border beneath it */
+    width: 24px; height: 95%; /* 95% so it doesn't affect the border beneath it */
     display: none; /* Don't display on mobile */
     background: linear-gradient(to right,rgba(255,255,255,0),rgba(255,255,255,1));
 
@@ -215,7 +220,7 @@ and also the click effects that happen when the button is active */
 }
 
 /* End Switch Button Classes */
-.dontDisplay {
+.dontDisplay, .DetectLanguagesBox.dontDisplay {
     display: none;
 }
 .DetectLanguagesBox.dontDisplay {
@@ -362,6 +367,9 @@ h5.selectCheck:before {
     background-repeat: no-repeat;
     background-position: center;
     opacity: 0.55;
+
+    /* Dont display on mobile */
+    display: none;
 }
 
 
@@ -377,5 +385,24 @@ h5.selectCheck:before {
     display: inline-block;
     background-color: #1973E7;
     color: white;
+    min-height: 170px;
 }
 
+footer {
+    background-color:#323232;
+    position: fixed;
+    bottom: 0;
+    width: 100vw;
+    font-size: 14px;
+    min-height: 48px;
+    color: white;
+    padding-left: 20px;
+    font-weight: 500;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: cente
+}
+
+.charCount {
+    display: none;
+}
