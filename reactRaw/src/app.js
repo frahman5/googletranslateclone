@@ -136,11 +136,15 @@ class TranslationHeader extends Component {
   }
 
   handleSwitchClick() {
+      let newActiveSourceLanguage = Utils.getActiveLanguage(this.state.targetLanguages);
+      let newActiveTargetLanguage = Utils.getActiveLanguage(this.state.sourceLanguages)
     if (this.state.switchButtonActive) {
       Flux.store.dispatch(Flux.createSwitchSourceTargetAction(
-        Utils.getActiveLanguage(this.state.targetLanguages),
-        Utils.getActiveLanguage(this.state.sourceLanguages)));
+        newActiveSourceLanguage,newActiveTargetLanguage));
     }
+
+    // Refresh the translation
+    Client.getTranslation(this.state.sourceText, newActiveSourceLanguage, newActiveTargetLanguage, false)
   }
 
   // str str -> None
@@ -177,7 +181,6 @@ class TranslationHeader extends Component {
       Flux.store.dispatch(Flux.createCloseSelectLanguageDropdownAction());
     }
   }
-
 
   render() {
     return (
@@ -519,6 +522,7 @@ class TranslationHeaderOptionButton extends Component {
 
   handleClick(evt) {
     if (window.innerWidth < 720) { // TODO: Is this cross-browser compatible?
+        console.log("Toggle selection dropdown action sent")
       Flux.store.dispatch(Flux.createToggleLanguageSelectionDropdownAction(this.props.sourceOrTarget));
     }
     this.props.onClick(this.props.sourceOrTarget, this.props.text);

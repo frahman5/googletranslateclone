@@ -364,19 +364,26 @@ function selectBoxOpenReducer(state = "", action) {
   var newState; // JSON Object e.g {'selectBoxOpen' : "source"}
 
   switch (action.type) {
-    case TOGGLE_LANGUAGE_SELECTION_DROPDOWN_ACTION_TYPE:
-      newState = ((state === "") ? action.inputOrOutput : "");
+		case TOGGLE_LANGUAGE_SELECTION_DROPDOWN_ACTION_TYPE:
+			console.log("Value of TOGGLE action in reducer: ", action)
+			console.log("Value of state in toggle reducer: ", state)
+			newState = ((state === "") ? action.inputOrOutput : "");
       break;
-    case CLOSE_SELECT_LANGUAGE_DROPDOWN_ACTION_TYPE:
+		case CLOSE_SELECT_LANGUAGE_DROPDOWN_ACTION_TYPE:
+			console.log("Close select language dropdown action fired (toggle)")
       newState = "";
       break;
-    case SWITCH_SOURCE_TARGET_ACTION_TYPE:
-      newState = ((state !== "") ? "" : state)
+		case SWITCH_SOURCE_TARGET_ACTION_TYPE: 
+			newState = ((state !== "") ? "" : state)
+			if (window.innerWidth < 720) {
+				newState = state
+			}
       break;
     default:
       newState = state;
   }
 
+	console.log("Value of newState in selectBoxOpenReducer right before return (Toggle) ", newState)
   return newState;
 }
 
