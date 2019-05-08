@@ -31,6 +31,7 @@ Basic Page CSS, including backgrounds, page header, header logo, and the page it
     width: 100vw; 
     height: 100vw; 
     font-family: 'Roboto', arial, sans-serif;
+    padding-bottom: 1800px; /* So when they ht a character limit, there's enough room for the error bar */
 }
 
 .background-1, .background-2 {
@@ -407,7 +408,8 @@ footer {
     font-weight: 500;
     display: flex;
     flex-flow: row nowrap;
-    align-items: cente
+    align-items: center;
+    z-index: 200;
 }
 
 .charCount {
