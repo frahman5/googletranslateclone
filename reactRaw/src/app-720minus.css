@@ -1,0 +1,381 @@
+/* 
+CSS styles for up to 720px width
+Note on positioning:
+    - Application makes heavy use of the 'position' property to get overall
+    page layout right. Z-index is used heavily, with elements holding z-indices
+    of 0, 100, -100, 200, -200 and so on. 
+*/
+ * {
+    box-sizing: border-box;
+ }
+
+/* Normalizing */
+input {
+  font-family: inherit; /* 1 */
+  font-size: 100%; /* 1 */
+  line-height: 1.15; /* 1 */
+  margin: 0; /* 2 */
+  border: none;
+}
+
+input:focus {
+    outline: none;
+}
+
+/*****
+
+Basic Page CSS, including backgrounds, page header, header logo, and the page itself 
+
+*****/
+.page { 
+    width: 100vw; 
+    height: 100vw; 
+    font-family: 'Roboto', arial, sans-serif;
+}
+
+.background-1, .background-2 {
+    background-color: #f5f5f5;
+    position: absolute;
+    width: 100vw;
+}
+.background-1 {
+    height: 228px;
+    z-index: 100;
+}
+
+.background-2 {
+    height: 100vh;
+    z-index: 0;
+}
+
+.header {
+    background-color: white;
+    height: 56px;
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+}
+
+.header--logo {
+    padding-left: 50px;
+}
+
+/***** 
+
+Main Translation Box 
+
+*****/
+
+/* Positioned relative to div.page 56px off the top, leaving space for header */
+.translationContainer {
+    position: absolute; top: 56px;
+    z-index: 200;    /* Sit on top of background-1 at all screen sizes */
+    width: 100vw;    
+    box-shadow: 0px 6px 4px -4px rgba(0,0,0,0.37) /* Want a box-shadow only the bottom */
+}
+
+.translationHeader {
+    background-color: white;
+    height: 48px; 
+    width: 100%; /* Of translationContainer */
+    border-top: 1px solid rgba(0,0,0,0.12);
+    border-bottom: 1px solid rgba(0,0,0,0.12);
+    text-transform: uppercase;
+}
+
+.translationInputBox {
+    height: 134px; width: 100%;
+    background-color: white;
+    padding: 17px 20px;
+}
+
+.translationOutputBox--empty, .translationOutputBox--filled  {
+    height: 167px; width: 100%;
+    background-color: blue;
+    padding: 17px 20px;
+}
+.translationOutputBox--empty > h1, .translationOutputBox--filled > h1 {
+    font-size: 24px;
+    font-weight: normal;
+    line-height: normal;
+    margin: 0 0;
+}
+textarea {
+    resize: none;
+    width: 100%;
+    height: 100%;
+    /*border: 1px solid red;*/
+    border: none;
+    font-size: 24px;
+}
+textarea:focus {
+    outline: none;
+}
+.translationHeader--input, .translationHeader--output {
+    width: calc(50% - 26px); /* Experimented to find value that achieved layout */
+    height: 48px;
+    display: inline-flex; /* Fixes bug where inclusion of fadeBox pushed langauge selection div down */
+    vertical-align: middle;
+}
+
+.translationHeaderDontDisplayAsFunctionOfSearchText {
+    display: none;
+}
+
+.translationHeader--input--languages, .translationHeader--output--languages {
+    height: 100%; width: 100%;
+
+    display: inline-flex;
+    flex-flow: row nowrap;
+    align-items: center;
+    justify-content: center;
+
+    overflow: hidden; /* Enables slide under effect */
+    position: relative; /* Apply position so we can position fadeBox relative to this div */
+}
+
+.translationHeader--input--languages > div.translationHeader--button > h3, 
+.translationHeader--output--languages > div.translationHeader--button > h3 {
+    padding: 24px;
+    font-size: 14px;
+    font-weight: 500;
+    letter-spacing: .14px;
+    line-height: 48px;
+}
+
+.translationHeader--button {
+    display: flex; align-items: center; /* To vertically center button contents */
+    justify-content: center; /* To horizontally center at <720px */
+    height: 100%;
+}
+
+.translationHeader--button:active {
+    background-color: #F5F5F5;
+}
+
+.translationHeader--button.unselectedLanguage {
+    display: none; /* On mobile, don't show unselected languages */
+    color: rgba(0,0,0,0.54);
+}
+
+.translationHeader--button.selectedLanguage {
+    width: 100%;
+    position: relative;
+    color: #4285f4;
+}
+
+/* Invisible div that enables gradient slide-under effect on Translation Header */
+.fadeBox {
+    width: 24px; height: 98%; /* 98% so it doesn't affect the border beneath it */
+    display: none; /* Don't display on mobile */
+    background: linear-gradient(to right,rgba(255,255,255,0),rgba(255,255,255,1));
+
+    /* Use absolute positioning to pin this to the right side of the languages div */
+    position: absolute; top: 0; right: 0;
+}
+.menuButton {
+    width: 48px; height: 48px;
+    display: none; /* Don't display on mobile */
+    background-image: url("https://ssl.gstatic.com/images/icons/material/system_gm/1x/keyboard_arrow_down_grey600_24dp.png");
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.menuButton:active {
+    background-color: #F5F5F5;
+}
+
+.menuButton--flipped {
+    transform: rotateZ(180deg);
+    transition: transform .2s cubic-bezier(.4,0,.2,1); 
+}
+
+/* Start Switch Button classes */
+.switchButtonActive, .switchButtonInactive {
+    width: 24px; height: 24px;
+    display: inline-block;
+    background-image: url("https://ssl.gstatic.com/translate/1x_mobile.png");
+    background-repeat: no-repeat;
+    background-position: 0px -48px;
+    border-radius: 100%;
+    /*opacity: .55;*/
+}
+.switchButtonActive { opacity: .55; }
+.switchButtonActive:hover { opacity: 1; }
+.switchButtonInactive { opacity: .20; }
+
+/* A CSS class for a wrapper around switchButton. It handles layout
+and also the click effects that happen when the button is active */
+.switchButtonWrapperActive, .switchButtonWrapperInactive {
+    width: 48px; height: 48px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 100%;
+    vertical-align: middle;
+}
+
+.switchButtonWrapperActive:active {
+    background: #D9D9D9;
+}
+
+/* End Switch Button Classes */
+.dontDisplay {
+    display: none;
+}
+.DetectLanguagesBox.dontDisplay {
+    display: none;
+}
+
+/* Dont display the detect language item in the language dropdown at <720px*/
+.detectLanguageItem.languageListItem {
+    display: none;
+}
+
+
+/* Select Language Dropdown Container */
+.TranslationSelectLanguageDropdownContainer {
+    /* Precisely the negative of how far TranslationContainer is from top of page */
+    position: absolute; top: -56px; 
+    width: 100vw;
+    background-color: white;
+}
+
+.SelectLanguageSearchBar {
+    height: 56px;
+    display: flex; flex-flow: row nowrap; align-items: center;
+    width: 100%;
+    box-shadow: 0px 4px 3px -3px rgba(0,0,0,0.5);
+}
+
+.SelectLanguageSearchBar > h1 {
+    display: inline-block;
+    border: 1px solid yellow;
+    font-family: 'Roboto', arial, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 700;
+
+}
+
+.backButton {
+    background-image: url("https://ssl.gstatic.com/images/icons/material/system/1x/arrow_back_grey600_24dp.png");
+    display: inline-block;
+    background-repeat: no-repeat;
+    width: 56px; height: 56px;
+    background-position: center;
+}
+
+.backButton:active {
+    background-color: #D9D9D9;
+}
+
+.languageSearchBar {
+    width: 100%; height: 53px;
+    padding-left: 15px;
+}
+
+.DetectLanguagesBox {
+    padding-left: 75px;
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+    height: 58px;
+    display: flex; align-items: center; /* Vertically center items */
+}
+
+.DetectLanguagesBox > img {
+    display: inline-block;
+    vertical-align: middle;
+    opacity: .45;
+    margin-left: 15px;
+    margin-top: 0px;
+}
+
+.DetectLanguagesBox > h5, .languageListItem {
+    display: inline-block;
+    font-size: 16px;
+    color: rgb(0,0,0);
+    font-weight: 400;
+    vertical-align: middle;
+}
+.RecentLanguages {
+    border-bottom: 1px solid rgba(0,0,0,0.15);
+}
+.RecentLanguages, .AllLanguages {
+    padding-bottom: 5px;
+}
+
+.RecentLanguages > h4, .AllLanguages > h4 {
+    margin-left: -60px;
+    color: #777;
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    padding-left: 75px;
+}
+
+.LanguageList {
+    display: flex;
+    flex-flow: column wrap;
+    height: fit-content;
+    justify-content: flex-start;
+}
+
+.languagelistItemWrapper {
+    width: 100%;
+    position: relative;
+}
+.languageListItem {
+    width: 100%;
+    margin: 0;
+    line-height: 44px;
+    padding-left: 75px;
+}
+
+.languageListItem:active {
+    box-shadow: 0px 3px 2px #b3e5fc, 0px -3px 2px #b3e5fc;
+}
+
+h5.selectCheck:before {
+    content: "";
+    display: inline-block;
+    height: 20px; width: 20px;
+    position: relative; right: 30px; top: 4px;
+
+    /* Get checkmark to far left and readjust text as needed */
+    margin-right: 6px; 
+    margin-left : -28px;
+
+    /* Set background */
+    background-image: url('https://ssl.gstatic.com/images/icons/material/system_gm/1x/done_black_24dp.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.55;
+}
+
+.recentLanguage:before {
+    content: "";
+    display: inline-block;
+    height: 20px; width: 20px;
+    position: relative; right: 30px; top: 4px;
+
+    /* Get checkmark to far left and readjust text as needed */
+    margin-right: -21px; 
+    margin-left : 0px;
+
+    /* Set background */
+    background-image: url('https://ssl.gstatic.com/images/icons/material/system_gm/1x/history_black_20dp.png');
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.55;
+}
+
+
+.detectLanguageIcon, .detectLanguageItem {
+    display: none;
+}
+
+.translationOutputBox--empty {
+    display: none;
+}
+
+.translationOutputBox--filled {
+    display: inline-block;
+    background-color: #1973E7;
+    color: white;
+}
+

@@ -3,7 +3,6 @@ package main
 
 import (
 	"context"
-	"flag"
 	"log"
 	"net/http"
 
@@ -11,6 +10,7 @@ import (
 	"github.com/frahman5/googletranslateclonebackend/services/config"
 	"github.com/frahman5/googletranslateclonebackend/services/publicapi"
 	"github.com/frahman5/googletranslateclonebackend/services/utils"
+	"google.golang.org/appengine"
 )
 
 // Services
@@ -19,26 +19,14 @@ var api publicapi.API
 
 func main() {
 	var (
-		dev, staging, production bool
-		ctx                      context.Context
-		client                   *translate.Client
-		err                      error
+		ctx      context.Context
+		client   *translate.Client
+		buildDir string
+		err      error
 	)
 
-	// Determine the environment
-	flag.BoolVar(&dev, "dev", true, "Use -dev to tell the program to run on the dev environment."+
-		"Default value is true. i.e program runs on dev by default")
-	flag.BoolVar(&staging, "staging", false, "Use -staging to tell the program to run on the staging environment."+
-		"Default value is false. program runs on dev by default")
-	flag.BoolVar(&production, "production", false, "Use -production to tell the program to run on the production environment."+
-		"Default value is false. Program runs on dev by default")
-	flag.Parse()
-	if production || staging {
-		dev = false
-	}
-
 	// Create COnfig
-	if cfg, err = config.NewConfig(true, false, false); err != nil {
+	if cfg, err = config.NewConfig(); err != nil {
 		log.Fatalf("Failed to create config: %v", err)
 	}
 
@@ -57,17 +45,18 @@ func main() {
 	}
 
 	// Set up ServeMux
-	http.HandleFunc("/translate", api.HandleTranslate)
-	http.HandleFunc("/detectlanguage", api.HandleDetectLanguage)
+	if buildDir, err = utils.GetAbsoluteFilepath("/build"); err != nil {
+		log.Fatal(err)
+	}
+	http.HandleFunc("/api/v1/translate", api.HandleTranslate)
+	http.HandleFunc("/api/v1/detectlanguage", api.HandleDetectLanguage)
 	http.HandleFunc("/_ah/health", api.HealthCheckHandler)
-	http.Handle("/", http.FileServer(http.Dir("/Users/faiyam/Development/Gocode/src/github.com/frahman5/googletranslateclonebackend/frontend/build")))
-	// appengine.Main()
-	if dev {
-		log.Print("Listening on port 8080")
-		log.Fatal(http.ListenAndServe(":8080", nil))
-	}
-	if staging {
-		log.Print("Listening on port 443, http")
-		log.Fatal(http.ListenAndServe(":443", nil))
-	}
+	http.Handle("/", http.FileServer(http.Dir(buildDir)))
+
+	// Load her up for app engine
+	appengine.Main()
+
+	// Load her up for dev
+	// log.Print("Listening on port 8080")
+	// log.Fatal(http.ListenAndServe(":8080", nil))
 }

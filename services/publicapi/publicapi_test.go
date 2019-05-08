@@ -22,7 +22,7 @@ func init() {
 	var err error
 
 	// Create COnfig
-	if cfg, err = config.NewConfig(true, false, false); err != nil {
+	if cfg, err = config.NewConfig(); err != nil {
 		log.Fatalf("Failed to create config: %v", err)
 	}
 

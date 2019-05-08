@@ -3,6 +3,9 @@ package utils
 import (
 	"context"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
 
 	"cloud.google.com/go/translate"
 	"golang.org/x/text/language"
@@ -36,4 +39,19 @@ func ListSupportedLanguages(targetLanguage string) (err error) {
 	}
 
 	return nil
+}
+
+// GetAbsoluteFilepath returns the absolute filepath of an asset given its filepath relative
+// to eitherthe applications root directory
+func GetAbsoluteFilepath(relativeFilepath string) (absoluteFilepath string, err error) {
+	var cwd, maindir string
+
+	if cwd, err = os.Getwd(); err != nil {
+		return
+	}
+	maindir = strings.SplitAfter(cwd, "googletranslateclonebackend")[0]
+
+	absoluteFilepath = filepath.Join(maindir, relativeFilepath)
+
+	return
 }

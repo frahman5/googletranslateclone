@@ -1,0 +1,209 @@
+
+/* CSS styles for greater than 720px window widths */
+@media (min-width: 720px) {
+    /* Basic page layout */
+    .background-1 { border-bottom: 1px solid rgba(0,0,0,0.12); }
+    .background-2 { background-color: white; }
+    .header { height: 64px; }
+
+    /* TranslationContainer */
+        /* Header */
+    .translationHeader--input--languages, .translationHeader--output--languages {
+        justify-content: flex-start;
+        width: fit-content;  /*On wider screens, shrink div to accomodate menuButton, fadeBox*/ 
+        padding-right: 24px; /* Makes space for fadeBox, pushses menuButton out */
+    }
+    .translationHeader--button.unselectedLanguage { display: flex; }
+    .menuButton, .fadeBox { display: inline-block; /* Make it show up at >720px */ }
+    .translationHeaderDontDisplayAsFunctionOfSearchText {
+        display: inline-block;
+    }
+
+     /* Add the bottom blue border on the inside */
+    .translationHeader--button.selectedLanguage:after {
+        position: absolute; top: 0; left: 0;
+        content: '';
+        height: 44px; width: 100%;
+        border-bottom: solid 3px #4284f3;
+        /*animation: border-grow .3s cubic-bezier(0.4,0,0.4,1) 0s;*/
+    }
+    .firstHeaderLanguage:active {
+        border-top-left-radius: 8px;
+    }
+        /* Main Container */
+    .translationContainer {
+        top: 124px;
+        height: 222px; /* fixes a bug where the translation container was 3px too tall for the contained elements */
+    }
+    .translationInputBox, .translationOutputBox--empty, .translationOutputBox--filled {
+        position: absolute;
+        top: 48px;
+        width: 50%; height: 174px;
+        padding: 25px 30px;
+        display: inline-block;
+    }
+    .translationInputBox {
+        background-color: white;
+        border-right: 1px solid #E0E0E0;
+    }
+    .translationOutputBox--empty, .translationOutputBox--filled {
+        right: 0px;
+    }
+    .translationOutputBox--empty {
+        background-color: white;
+    }
+    .translationOutputBox--filled {
+        background-color: #f5f5f5;
+        color: black;
+    }
+    .translationInputTextArea {
+        width: 100%;
+        height: 95%;
+    }
+    textarea {
+        resize: none;
+        width: 100%;
+        height: 100%;
+        /*border: 1px solid red;*/
+        border: none;
+        font-size: 24px;
+    }
+    textarea:focus {
+        outline: none;
+    }
+
+    /* Select Language Dropdown Container */
+    .TranslationSelectLanguageDropdownContainer {
+        top: 48px;
+        width: 100%;
+        box-shadow: 0px 6px 4px -4px rgba(0,0,0,0.37); /* Want a box-shadow only the bottom */
+        box-shadow: 0 1px 4px 0 rgba(0,0,0,0.37); /* JK. On the sides too :) ; */
+    }
+    .DetectLanguagesBox, .RecentLanguages, .AllLanguages > h4 {
+        display: none;
+    }
+    .LanguageList {
+        height: 800px; /* Use height of container to control flex wrapping */
+    }
+    .AllLanguages {
+        padding-left: 26px;
+        padding-top: 10px;
+    }
+    .languagelistItemWrapper {
+        width: 32%; /* leave some space between items at this width */
+        position: relative;
+
+        /* make it a flex box to get the Detect language image displaying right */
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: center;
+    }
+    .languagelistItemWrapper > img {
+        height: 20px;
+        margin-left: -40px;
+    }
+    .languageListItem {
+        width: 100%;
+        display: inline-block;
+        font-size: 15px;
+        line-height: 32px;
+        padding-left: 55px;
+        border: 1px solid transparent; /* So that when we apply a border in :active, the boxes don't move */;
+    }
+    .detectLanguageItem, .detectLanguageIcon {
+        display: inline-block;
+    }
+    .detectLanguageItem:after, .detectLanguageItem.selectCheck:after {
+        content: "";
+
+        /* Set display properties */
+        display: inline-block;
+        vertical-align: middle;
+        width: 20px;
+        height: 20px;
+        margin-left: 10px;
+
+        /* Set background */
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    .detectLanguageItem:after {
+        background-image: url('https://ssl.gstatic.com/images/icons/material/system/1x/auto_awesome_grey600_24dp.png');
+    }
+    /* If it's selected, change */
+    .detectLanguageItem.selectCheck:after {
+        /* Set background */
+        background-image: url('https://ssl.gstatic.com/images/icons/material/system/1x/auto_awesome_googblue_24dp.png');
+    }
+
+    .languagelistItemWrapper:hover {
+        background: #F4F4F4;
+    }
+    .languageListItem:active {
+        box-shadow: none;
+        border: 1px solid #bdc1c6;
+    }
+    h5.selectCheck {
+        background-color: #E8F0FE;
+        color: #1a73e8;
+        font-weight: 500;
+    }
+    h5.selectCheck:before {
+        background-image: url('https://ssl.gstatic.com/images/icons/material/system_gm/1x/done_googblue_20dp.png');
+        opacity: 1;
+        right: 4px; top: 4px;
+    }
+    h1.emptyTranslateBox{
+        color:#878787;
+        font-size: 24px;
+        font-weight: 500;
+    }
+    /* Bring back the detect lang item at > 720px*/
+    .detectLanguageItem.languageListItem {
+        display: inline-block;
+    }
+}
+
+@media (min-width: 1024px) {
+    .languagelistItemWrapper {
+        width: 24%; /* Leave some space between items at this width */
+    }
+    .LanguageList {
+        height : 620px;
+    }
+}
+@media (min-width: 1280px) {
+    /* Fix the width and center it horizontally */
+    .translationContainer {
+        width: 1280px;
+        left: calc(50% - 640px); right: calc(50% - 640px);
+        box-shadow: 0 1px 4px 0 rgba(0,0,0,0.37);
+        border-radius: 8px;
+    }
+    /* Round out the edges of the translationContainer */
+    .translationInputBox { border-bottom-left-radius: 8px; }
+    .translationOutputBox--empty, .translationOutputBox--filled { border-bottom-right-radius: 8px; }
+    .translationHeader {
+        border-top-left-radius: 8px;
+        border-top-right-radius: 8px;
+    }
+    .killBoxShadow {
+        box-shadow: none;
+    }
+    .addTranslationHeaderBoxShadow {
+        box-shadow: 0 1px 4px 0 rgba(0,0,0,0.37);
+    }
+    .SelectLanguageSearchBar {
+        box-shadow: none;
+        border-bottom: 1px solid rgba(0,0,0,0.12);
+    }
+    .LanguageList {
+        height : 410px;
+    }
+    .languagelistItemWrapper {
+        width: 16.6%;
+    }
+ /*   .languageListItem {
+        width: 16.6%;
+    }*/
+}
