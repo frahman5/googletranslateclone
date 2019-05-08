@@ -694,7 +694,7 @@ const Background = props => {
 const Header = props => {
   return (
     <header className="header">
-        </header>
+			<p>This simplified demo of Google Translate is brought to you by ReadyMadeGO. For more information, see <a target="_blank" rel="noopener" href="https://www.readymadego.co">www.readymadego.co</a></p></header>
     );
 }
 
