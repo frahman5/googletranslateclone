@@ -8,11 +8,11 @@ import (
 	"net/http"
 
 	"cloud.google.com/go/translate"
-	_ "github.com/lib/pq" // to allow initialization of database
+	"github.com/frahman5/googletranslateclonebackend/services/config"
 	"golang.org/x/text/language"
 )
 
-type TranslatePayload struct {
+type translatePayload struct {
 	InputText            string `json:"inputText"`
 	InputLanguage        string `json:"inputLanguage"`
 	OutputLanguage       string `json:"outputLanguage"`
@@ -22,7 +22,7 @@ type TranslatePayload struct {
 // API is a struct that holds all the other structs necessary to handle API requests.
 type API struct {
 	// Config is a type that holds all the configurations for the app
-	// Config config.Config
+	Config config.Config
 
 	// TranslationClient is the agent that speaks with the Google Translate API
 	TranslationClient *translate.Client
@@ -37,8 +37,9 @@ func (a *API) HandleTranslate(w http.ResponseWriter, r *http.Request) {
 	var (
 		inputTag, targetTag language.Tag
 		opts                translate.Options
-		payload             TranslatePayload
+		payload             translatePayload
 		translations        []translate.Translation
+		matcher             language.Matcher
 		err                 error
 	)
 
@@ -49,31 +50,15 @@ func (a *API) HandleTranslate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tags := []language.Tag{
-		language.English,
-		language.Albanian,
-		language.Spanish,
-		language.Azerbaijani,
-		language.Russian,
-		language.BritishEnglish,
-		language.French,
-		language.Afrikaans,
-		language.BrazilianPortuguese,
-		language.EuropeanPortuguese,
-		language.Croatian,
-		language.SimplifiedChinese,
-		language.Raw.Make("iw-IL"),
-		language.Raw.Make("iw"),
-		language.Raw.Make("he"),
-	}
-	m := language.NewMatcher(tags)
+	// get the matcher
+	matcher = a.getSuppoortedLanguagesMatcher()
 
 	// Get the input language
-	inputTag, _ = language.MatchStrings(m, payload.InputLanguage)
+	inputTag, _ = language.MatchStrings(matcher, payload.InputLanguage)
 	fmt.Println(inputTag)
 
 	// Get the target language.
-	targetTag, _ = language.MatchStrings(m, payload.OutputLanguage)
+	targetTag, _ = language.MatchStrings(matcher, payload.OutputLanguage)
 	fmt.Println(targetTag)
 
 	// Translates the text.
@@ -94,12 +79,21 @@ func (a *API) HandleTranslate(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 
-	fmt.Printf("Just sent response with translation text: %v\n", translations[0].Text)
 	fmt.Fprint(w, translations[0].Text)
-	fmt.Fprint(w, "hi")
 }
 
 // HealthCheckHandler is the handler for /_ah/health. It signals that the server is responding to requests.
 func (a *API) HealthCheckHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "ok")
+}
+
+func (a *API) getSuppoortedLanguagesMatcher() (matcher language.Matcher) {
+	var tags []language.Tag
+
+	for langTagString := range a.Config.SupportedLanguages {
+		tags = append(tags, language.Raw.Make(langTagString))
+	}
+	matcher = language.NewMatcher(tags)
+
+	return
 }

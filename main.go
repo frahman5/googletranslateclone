@@ -9,6 +9,7 @@ import (
 
 	"cloud.google.com/go/translate"
 	"github.com/frahman5/googletranslateclonebackend/services/publicapi"
+	"github.com/frahman5/googletranslateclonebackend/services/utils"
 )
 
 // Services
@@ -38,10 +39,15 @@ func main() {
 	ctx = context.Background()
 	if client, err = translate.NewClient(ctx); err != nil {
 		log.Fatalf("Failed to create client: %v", err)
-	}
+	} // We don't do a defer client.Close() because the client should never close! :)
 
 	// Create the API object
 	api = publicapi.API{TranslationClient: client, Context: ctx}
+
+	// List supported languages
+	if err = utils.ListSupportedLanguages("en"); err != nil {
+		log.Fatalf("Failed to get supported languages: %v", err)
+	}
 
 	// Set up ServeMux
 	http.HandleFunc("/translate", api.HandleTranslate)
