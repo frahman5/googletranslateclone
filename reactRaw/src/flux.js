@@ -334,7 +334,7 @@ function sourceTextReducer(state = "", action) {
 
   switch (action.type) {
     case NEW_SOURCE_TEXT_ACTION_TYPE:
-      console.log("Value of NEW_SOURCE_TEXT action in sourceTextReducer: ", action)
+      //console.log("Value of NEW_SOURCE_TEXT action in sourceTextReducer: ", action)
       // Initiate the translation process
       if (action.sourceLanguage === Config.detectLanguageHeaderBarHTML) {
         Client.getTranslation(action.text, "", action.targetLanguage, true);
@@ -375,12 +375,12 @@ function selectBoxOpenReducer(state = "", action) {
 
   switch (action.type) {
 		case TOGGLE_LANGUAGE_SELECTION_DROPDOWN_ACTION_TYPE:
-			console.log("Value of TOGGLE action in reducer: ", action)
-			console.log("Value of state in toggle reducer: ", state)
+			//console.log("Value of TOGGLE action in reducer: ", action)
+			//console.log("Value of state in toggle reducer: ", state)
 			newState = ((state === "") ? action.inputOrOutput : "");
       break;
 		case CLOSE_SELECT_LANGUAGE_DROPDOWN_ACTION_TYPE:
-			console.log("Close select language dropdown action fired (toggle)")
+			//console.log("Close select language dropdown action fired (toggle)")
       newState = "";
       break;
 		case SWITCH_SOURCE_TARGET_ACTION_TYPE: 
@@ -393,7 +393,7 @@ function selectBoxOpenReducer(state = "", action) {
       newState = state;
   }
 
-	console.log("Value of newState in selectBoxOpenReducer right before return (Toggle) ", newState)
+	//console.log("Value of newState in selectBoxOpenReducer right before return (Toggle) ", newState)
   return newState;
 }
 

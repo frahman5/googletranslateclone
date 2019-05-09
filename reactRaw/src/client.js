@@ -2,8 +2,10 @@ import Flux from './flux.js'
 import Utils from './utils.js'
 
 // API Endpoints
-const TRANSLATE_ENDPOINT = "https://gtranslateclone-1557162436236.appspot.com/api/v1/translate"
-const DETECT_ENDPOINT = "https://gtranslateclone-1557162436236.appspot.com/api/v1/detectlanguage"
+// const TRANSLATE_ENDPOINT = "https://gtranslateclone-1557162436236.appspot.com/api/v1/translate"
+// const DETECT_ENDPOINT = "https://gtranslateclone-1557162436236.appspot.com/api/v1/detectlanguage"
+const TRANSLATE_ENDPOINT = "/api/v1/translate"
+const DETECT_ENDPOINT = "/api/v1/detectlanguage"
 
 // languageTagMap translates human-readable language names into ~2-3 character language tags that are compatable with
 // Google Translate's machine algorthms. This is needed for compatability with the server
@@ -20,37 +22,32 @@ function getTranslation(inputText, inputLang, outputLang, shouldDetectLanguage) 
     "outputLanguage": languageTagMap.get(outputLang),
     "shouldDetectLanguage": shouldDetectLanguage
   }
-  // Should add something that checks status
-  return fetch(TRANSLATE_ENDPOINT, {
-    method: 'post',
-    body: JSON.stringify(data),
-  }).then(loadTranslationFromServer);
+	var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	xmlhttp.onreadystatechange = () => { 
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				Flux.store.dispatch(Flux.createNewTargetTextAction(xmlhttp.responseText))
+    }
+	}
+	xmlhttp.open("POST", TRANSLATE_ENDPOINT);
+	xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xmlhttp.send(JSON.stringify(data));
 }
 
 function getDetection(inputText) {
   let data = {
     "inputText": inputText
-  }
-  console.log("data sent out in getDetection", data)
-
-  return fetch(DETECT_ENDPOINT, {
-    method: 'post',
-    body: JSON.stringify(data),
-  }).then(loadDetectionFromServer);
-
+	}
+	
+	var xmlhttp = new XMLHttpRequest();   // new HttpRequest instance 
+	xmlhttp.open("POST", DETECT_ENDPOINT);
+	xmlhttp.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+	xmlhttp.send(JSON.stringify(data));
+	xmlhttp.onreadystatechange = () => { 
+    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+				Flux.store.dispatch(Flux.createNewDetectionAction(xmlhttp.responseText))
+    }
+	}
 }
-
-async function loadDetectionFromServer(response) {
-  let text = await response.text()
-  console.log("Text in loadDetectionFromServer", text)
-  Flux.store.dispatch(Flux.createNewDetectionAction(text))
-}
-
-async function loadTranslationFromServer(response) {
-  let text = await response.text()
-  Flux.store.dispatch(Flux.createNewTargetTextAction(text))
-}
-
 
 // Export as a ES6 module
 const Client = {

@@ -415,3 +415,14 @@ footer {
 .charCount {
     display: none;
 }
+
+@media (max-width: 480px) {
+    .translationHeader--input--languages > div.translationHeader--button > h3, 
+    .translationHeader--output--languages > div.translationHeader--button > h3 {
+        font-size: 12px;
+    }
+
+    header {
+        font-size: 12px;
+    }
+}   

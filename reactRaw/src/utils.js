@@ -59,7 +59,7 @@ function searchLanguges(searchText) {
   var newLanguageArray = allLanguages.filter((lang) => {
     return lang.toLowerCase().startsWith(searchText.toLowerCase())
   })
-  console.log("New language array at end of search array function", newLanguageArray)
+  //console.log("New language array at end of search array function", newLanguageArray)
   return newLanguageArray
 }
 

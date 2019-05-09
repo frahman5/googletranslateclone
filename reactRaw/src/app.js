@@ -272,6 +272,7 @@ class TranslationHeader extends Component {
       Flux.store.dispatch(Flux.createSwitchSourceTargetAction(activeTargetLanguage, activeSourceLanguage));
     } else {
       Flux.store.dispatch(Flux.createSelectLanguageAction(sourceOrTarget, selectedLanguage, this.state.sourceText));
+      window.scroll(0,0);
     }
 
     // If there is a translation open and the user selected a new target language, refresh the translation
@@ -387,6 +388,7 @@ class TranslationSelectLanguageDropdownContainer extends Component {
     // select the language and close the dropdown
     Flux.store.dispatch(Flux.createSelectLanguageAction(sourceOrTarget, newSelection, this.state.sourceText));
     Flux.store.dispatch(Flux.createCloseSelectLanguageDropdownAction());
+    window.scroll(0,0);
 
     // Send off new source text, since changing the language is practically changing source text
     if (sourceOrTarget === "source") {
@@ -552,18 +554,16 @@ class TranslationInputBox extends Component {
 			return (< TextareaAutosize
 									id="@sourceText"
 									className={reduceFontIfLongInputCSS}
-									onInput={this.props.onInput}
+									onChange={this.props.onInput}
 									value={this.state.sourceText}
-									maxLength="5000"
-									uniqueKey="fancytextarea"/>)
+									maxLength="5000"/>)
 		}
-		return  <textarea id="@sourceText"
-										  className={reduceFontIfLongInputCSS}
-										  onInput={this.props.onInput}
-										  value={this.state.sourceText}
-										  maxLength="5000"
-											uniqueKey="normaltextarea">"
-						</textarea>
+		    return  <textarea id="@sourceText"
+                                    className={reduceFontIfLongInputCSS}
+                                    onChange={this.props.onInput}
+                                    value={this.state.sourceText}
+                                    maxLength="5000">
+					</textarea>
 	}
 
   render() {
